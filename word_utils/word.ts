@@ -12,7 +12,6 @@ export const dot = function(wv1 : WordVector, wv2 : WordVector) : number {
     for(let i = 0; i < n; i++) {
         sum += wv1[i]*wv2[i]
     }
-
     return sum;
 }
 
@@ -64,7 +63,7 @@ export const normalize = function(wv1) {
 }
 
 export const similarity = function(wv1: WordVector, wv2: WordVector): number {
-    return dot(wv1, wv1) / (norm(wv1) * norm(wv2));
+    return dot(wv1, wv2) / (norm(wv1) * norm(wv2));
 }
 
 export const project = function(wv: WordVector, subspace: Subspace) {
@@ -95,7 +94,7 @@ export const topNWordsBy = function(wordList: WordList, n: number, iteratee: (wo
     return Object.entries(wordList).map(
         ([word, wordVector]) => [word, iteratee(wordVector)]
     ).sort(
-        (a,b) => a[1] > b[1] ? 1 : -1
+        (a,b) => a[1] > b[1] ? - 1 : 1
     ).slice(0, n -1)
 }
 
@@ -109,8 +108,31 @@ export const getWordList = function() {
     return wordList;
 }
 
+export const randomWord = function() : Word{
+    const keys = Object.keys(getWordList());
+    const n = keys.length;
+    const ix = Math.round(Math.random()*n);
+    const key = keys[ix];
+    return [key, getWordList()[key]];
+}
+
+export const getWord = function(wordString: string): Word {
+    return [wordString, getWordList()[wordString.toUpperCase()]];
+}
+
 export const closestNWordsToSubspace = function(subspace:Subspace, n: number) {
     const wordList = getWordList();
     return topNWordsBy(wordList, n, (wv) => distanceToSubspace(wv, subspace))
 }
 
+export const closestNWords = function(word: Word, n: number = 10) {
+    const [wordString, vector] = word;
+    return topNWordsBy(
+        getWordList(),
+        n,
+        v => similarity(v,vector)
+    )
+}
+
+export const pickWordString = (word:Word) => word[0];
+export const pickWordStrings = (words:Word[]) => words.map(word => word[0]);

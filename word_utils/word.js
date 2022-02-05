@@ -5,7 +5,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from) {
     return to;
 };
 exports.__esModule = true;
-exports.closestNWordsToSubspace = exports.getWordList = exports.topNWordsBy = exports.randomSubspace = exports.randomWordVector = exports.distanceToSubspace = exports.project = exports.similarity = exports.normalize = exports.metric = exports.add = exports.subtract = exports.scalarMult = exports.norm = exports.dot = void 0;
+exports.pickWordStrings = exports.pickWordString = exports.closestNWords = exports.closestNWordsToSubspace = exports.getWord = exports.randomWord = exports.getWordList = exports.topNWordsBy = exports.randomSubspace = exports.randomWordVector = exports.distanceToSubspace = exports.project = exports.similarity = exports.normalize = exports.metric = exports.add = exports.subtract = exports.scalarMult = exports.norm = exports.dot = void 0;
 var fs_1 = require("fs");
 var dot = function (wv1, wv2) {
     var n = wv1.length;
@@ -62,7 +62,7 @@ var normalize = function (wv1) {
 };
 exports.normalize = normalize;
 var similarity = function (wv1, wv2) {
-    return exports.dot(wv1, wv1) / (exports.norm(wv1) * exports.norm(wv2));
+    return exports.dot(wv1, wv2) / (exports.norm(wv1) * exports.norm(wv2));
 };
 exports.similarity = similarity;
 var project = function (wv, subspace) {
@@ -90,7 +90,7 @@ var topNWordsBy = function (wordList, n, iteratee) {
     return Object.entries(wordList).map(function (_a) {
         var word = _a[0], wordVector = _a[1];
         return [word, iteratee(wordVector)];
-    }).sort(function (a, b) { return a[1] > b[1] ? 1 : -1; }).slice(0, n - 1);
+    }).sort(function (a, b) { return a[1] > b[1] ? -1 : 1; }).slice(0, n - 1);
 };
 exports.topNWordsBy = topNWordsBy;
 var wordList;
@@ -102,8 +102,30 @@ var getWordList = function () {
     return wordList;
 };
 exports.getWordList = getWordList;
+var randomWord = function () {
+    var keys = Object.keys(exports.getWordList());
+    var n = keys.length;
+    var ix = Math.round(Math.random() * n);
+    var key = keys[ix];
+    return [key, exports.getWordList()[key]];
+};
+exports.randomWord = randomWord;
+var getWord = function (wordString) {
+    return [wordString, exports.getWordList()[wordString.toUpperCase()]];
+};
+exports.getWord = getWord;
 var closestNWordsToSubspace = function (subspace, n) {
     var wordList = exports.getWordList();
     return exports.topNWordsBy(wordList, n, function (wv) { return exports.distanceToSubspace(wv, subspace); });
 };
 exports.closestNWordsToSubspace = closestNWordsToSubspace;
+var closestNWords = function (word, n) {
+    if (n === void 0) { n = 10; }
+    var wordString = word[0], vector = word[1];
+    return exports.topNWordsBy(exports.getWordList(), n, function (v) { return exports.similarity(v, vector); });
+};
+exports.closestNWords = closestNWords;
+var pickWordString = function (word) { return word[0]; };
+exports.pickWordString = pickWordString;
+var pickWordStrings = function (words) { return words.map(function (word) { return word[0]; }); };
+exports.pickWordStrings = pickWordStrings;
